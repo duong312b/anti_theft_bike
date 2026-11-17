@@ -1,0 +1,120 @@
+menu "Anti-Theft Bike Configuration"
+
+    menu "Pin assignment"
+
+        config ATB_I2C_SDA_GPIO
+            int "I2C SDA GPIO (MPU6050 + LCD)"
+            default 21
+        config ATB_I2C_SCL_GPIO
+            int "I2C SCL GPIO (MPU6050 + LCD)"
+            default 22
+        config ATB_I2C_FREQ_HZ
+            int "I2C clock (Hz)"
+            default 100000
+
+        config ATB_MPU_INT_GPIO
+            int "MPU6050 INT GPIO"
+            default 27
+            help
+                MPU6050 INT output. Used to wake the motion task on movement.
+
+        config ATB_MODEM_TX_GPIO
+            int "ESP32 TX -> modem RXD"
+            default 17
+        config ATB_MODEM_RX_GPIO
+            int "ESP32 RX <- modem TXD"
+            default 16
+        config ATB_MODEM_RST_GPIO
+            int "Modem RST GPIO (-1 = not connected)"
+            default 33
+        config ATB_MODEM_DTR_GPIO
+            int "Modem DTR GPIO (-1 = not connected)"
+            default 32
+        config ATB_MODEM_RI_GPIO
+            int "Modem RI GPIO (-1 = not connected)"
+            default 35
+            help
+                Ring indicator: pulses on incoming SMS/call. GPIO34-39 are input-only, which is fine here.
+
+        config ATB_GNSS_RX_GPIO
+            int "ESP32 RX <- module GNSS_TX"
+            default 26
+        config ATB_GNSS_TX_GPIO
+            int "ESP32 TX -> module GNSS_RX"
+            default 25
+
+    endmenu
+
+    menu "Modem / SMS"
+
+        config ATB_MODEM_BAUD
+            int "Modem AT UART baud rate"
+            default 115200
+        config ATB_GNSS_BAUD
+            int "GNSS NMEA UART baud rate"
+            default 9600
+        config ATB_MODEM_RST_ACTIVE_LOW
+            bool "Modem RST is active low"
+            default y
+        config ATB_GNSS_ENABLE_CMD
+            string "AT command that turns the GNSS on"
+            default "AT+GPS=1"
+            help
+                Sent after the modem boots. "AT+GPS=1" is for Ai-Thinker A9G style modules.
+                Change it for your module (e.g. "AT+CGNSPWR=1" on SIMCom). Leave it empty to skip.
+        config ATB_PHONE_NUMBER
+            string "Phone number that receives alert SMS"
+            default "+84000000000"
+            help
+                Use international format, e.g. +84912345678.
+
+    endmenu
+
+    menu "Motion detection"
+
+        config ATB_MPU_MOT_THR
+            int "MPU hardware wake threshold (1 LSB ~ 2 mg)"
+            range 1 255
+            default 20
+        config ATB_MPU_MOT_DUR_MS
+            int "MPU hardware wake duration (ms)"
+            range 1 255
+            default 5
+        config ATB_ACCEL_THR_MG
+            int "Software accel deviation threshold (mg)"
+            default 150
+            help
+                A sample counts as "active" if | |a| - 1g | exceeds this value.
+        config ATB_GYRO_THR_DPS
+            int "Software gyro threshold (deg/s)"
+            default 20
+        config ATB_TILT_THR_DEG
+            int "Tilt change vs. armed pose that triggers an alarm (deg)"
+            default 15
+        config ATB_CONFIRM_WINDOW_MS
+            int "Confirmation window after wake (ms)"
+            default 2000
+        config ATB_CONFIRM_MIN_ACTIVE
+            int "Active samples (at 100 Hz) needed in the window to confirm theft"
+            default 40
+
+    endmenu
+
+    menu "Alarm behaviour"
+
+        config ATB_ARM_ON_BOOT
+            bool "Arm the system on boot"
+            default y
+        config ATB_ARM_DELAY_S
+            int "Delay after arming before monitoring starts (s)"
+            default 10
+        config ATB_TRACK_INTERVAL_S
+            int "Seconds between tracking SMS while in alarm"
+            default 120
+        config ATB_TRACK_MAX_SMS
+            int "Max tracking SMS per alarm (0 = only the first alert)"
+            default 5
+
+    endmenu
+
+endmenu
